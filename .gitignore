@@ -20,6 +20,7 @@ db.sqlite3-journal
 
 # Django migrations
 */migrations/*
+migrations/
 
 # VS Code settings
 .vscode/

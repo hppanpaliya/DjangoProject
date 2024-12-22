@@ -21,4 +21,6 @@ import Loginify.views
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", Loginify.views.hello_world),
+    path("login/", Loginify.views.login),
+    path("signup/", Loginify.views.signup),
 ]

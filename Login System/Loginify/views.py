@@ -1,7 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from .forms import SignupForm, LoginForm
 from .models import UserDetail
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 # Create your views here.
 
@@ -63,3 +65,81 @@ def login(request):
     else:
         form = LoginForm()
     return render(request, "Loginify/login.html", {"form": form})
+
+
+@csrf_exempt
+def get_all_users(request):
+    if request.method == 'GET':
+        try:
+            users = UserDetail.objects.all()
+            data = list(users.values())
+            return JsonResponse({
+                'success': True,
+                'data': data
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
+
+
+@csrf_exempt
+def user_operations(request, email):
+    if request.method == 'GET':
+        try:
+            user = UserDetail.objects.get(email=email)
+            data = {
+                'username': user.username,
+                'email': user.email,
+                'password': user.password
+            }
+            return JsonResponse({
+                'success': True,
+                'data': data
+            })
+        except UserDetail.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': 'User not found'
+            }, status=404)
+
+    elif request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            user = UserDetail.objects.get(email=email)
+            
+            if 'username' in data:
+                user.username = data['username']
+            if 'password' in data:
+                user.password = data['password']
+            
+            user.save()
+            return JsonResponse({
+                'success': True,
+                'message': 'User updated successfully'
+            })
+        except UserDetail.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': 'User not found'
+            }, status=404)
+
+    elif request.method == 'DELETE':
+        try:
+            user = UserDetail.objects.get(email=email)
+            user.delete()
+            return JsonResponse({
+                'success': True,
+                'message': 'User deleted successfully'
+            })
+        except UserDetail.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': 'User not found'
+            }, status=404)
+
+    return JsonResponse({
+        'success': False,
+        'error': 'Invalid method'
+    }, status=400)

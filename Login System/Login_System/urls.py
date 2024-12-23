@@ -23,4 +23,6 @@ urlpatterns = [
     path("", Loginify.views.hello_world),
     path("login/", Loginify.views.login),
     path("signup/", Loginify.views.signup),
+    path('users/', Loginify.views.get_all_users),
+    path('users/<str:email>/', Loginify.views.user_operations),
 ]
